@@ -70,15 +70,14 @@ Annuaire en tableau dynamique : `seq_insert` / `seq_free`, capacité qui démarr
 **Suite des capacités (40 insertions)**
 
 ```
-
-
+16 (insertions 1→16), puis 32 (17→32), puis 64 (33→40)
 ```
 
 **Q5** — Combien de `realloc` pour 40 ? Pour 1000 ?
 
 ```
-
-
+40 insertions : 3 fois (0→16, 16→32, 32→64)
+1000 insertions : 7 fois (16, 32, 64, 128, 256, 512, 1024)
 ```
 
 ---
@@ -91,24 +90,24 @@ Recherche séquentielle (`seq_search` + `strcmp`), cas favorable / moyen / défa
 
 | Recherche | Attendu | Obtenu |
 | --- | --- | --- |
-| Adresse présente | true | |
-| Adresse absente | false | |
-| Annuaire vide | false | |
+| Adresse présente | true | true |
+| Adresse absente | false | false |
+| Annuaire vide | false | false |
 
 **Q4** — Remplacer `strcmp` par `==` : observation
 
 ```
-
-
+Le programme compile (éventuellement avec un warning selon le compilateur).
+La recherche renvoie toujours false : == compare les adresses, pas le contenu des chaînes.
 ```
 
 **Q5** — Nb de comparaisons (favorable / moyen / défavorable)
 
 | Cas | Nb | Donnée |
 | --- | --- | --- |
-| Favorable | | |
-| Moyen | | |
-| Défavorable | | |
+| Favorable | 1 | L’e-mail est en première position |
+| Moyen | ~n/2 | L’e-mail est au milieu |
+| Défavorable | n | Absent, ou en dernière position |
 
 ---
 
