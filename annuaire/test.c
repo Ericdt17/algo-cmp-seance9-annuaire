@@ -1,30 +1,65 @@
 #include <stdio.h>
 #include "annuaire.h"
 
-static void afficher(const char *titre, bool obtenu)
+static int nb_ok = 0;
+static int nb_total = 0;
+
+static void verifier(const char *titre, bool obtenu, bool attendu)
 {
-    printf("%s -> %s\n", titre, obtenu ? "true" : "false");
+    nb_total++;
+    if (obtenu == attendu) {
+        printf("[OK]    %s\n", titre);
+        nb_ok++;
+    } else {
+        printf("[ECHEC] %s (obtenu=%s, attendu=%s)\n",
+               titre,
+               obtenu ? "true" : "false",
+               attendu ? "true" : "false");
+    }
 }
 
 int main(void)
 {
-    /* --- tests sur annuaire avec 5 adresses --- */
-    seq_insert("alice@mail.com", 1);
-    seq_insert("bob@mail.com", 2);
-    seq_insert("carole@mail.com", 3);
-    seq_insert("david@mail.com", 4);
-    seq_insert("eve@mail.com", 5);
+    /* 1. annuaire vide */
+    verifier("seq : annuaire vide", seq_search("alice@mail.com"), false);
+    verifier("hash : annuaire vide", hash_search("alice@mail.com"), false);
 
-    afficher("alice presente", seq_search("alice@mail.com"));
-    afficher("carole presente", seq_search("carole@mail.com"));
-    afficher("eve presente", seq_search("eve@mail.com"));
-    afficher("inconnu absente", seq_search("inconnu@mail.com"));
-    afficher("zoe absente", seq_search("zoe@mail.com"));
+    /* 2. inserer les memes 5 utilisateurs dans les deux structures */
+    const char *emails[] = {
+        "alice@mail.com",
+        "bob@mail.com",
+        "carole@mail.com",
+        "david@mail.com",
+        "eve@mail.com",
+    };
+    for (int i = 0; i < 5; i++) {
+        seq_insert(emails[i], i + 1);
+        hash_insert(emails[i], i + 1);
+    }
 
+    /* 3. les cinq adresses trouvees par les deux approches */
+    for (int i = 0; i < 5; i++) {
+        char titre[80];
+        snprintf(titre, sizeof titre, "seq trouve %s", emails[i]);
+        verifier(titre, seq_search(emails[i]), true);
+        snprintf(titre, sizeof titre, "hash trouve %s", emails[i]);
+        verifier(titre, hash_search(emails[i]), true);
+    }
+
+    /* 4. deux adresses absentes */
+    verifier("seq absente inconnu", seq_search("inconnu@mail.com"), false);
+    verifier("hash absente inconnu", hash_search("inconnu@mail.com"), false);
+    verifier("seq absente zoe", seq_search("zoe@mail.com"), false);
+    verifier("hash absente zoe", hash_search("zoe@mail.com"), false);
+
+    /* 5. seule la casse differre */
+    verifier("seq casse Alice", seq_search("Alice@mail.com"), false);
+    verifier("hash casse Alice", hash_search("Alice@mail.com"), false);
+
+    /* liberer toute la memoire */
     seq_free();
+    hash_free();
 
-    /* --- test sur annuaire vide --- */
-    afficher("annuaire vide", seq_search("alice@mail.com"));
-
-    return 0;
+    printf("\nResultat : %d / %d tests OK\n", nb_ok, nb_total);
+    return (nb_ok == nb_total) ? 0 : 1;
 }

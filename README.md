@@ -119,38 +119,36 @@ Fonction de hachage djb2 : calculer un indice plutôt que parcourir.
 
 | Adresse | Indice (`% 1024`) |
 | --- | --- |
-| alice@mail.com | |
-| bob@mail.com | |
-| carole@mail.com | |
-| david@mail.com | |
-| eve@mail.com | |
+| alice@mail.com | 19 |
+| bob@mail.com | 104 |
+| carole@mail.com | 747 |
+| david@mail.com | 189 |
+| eve@mail.com | 181 |
 
 **Q3** — alice 3 fois de suite
 
 ```
-
-
+Toujours le même indice (19). Indispensable : sinon on ne retrouverait pas l'élément après l'avoir rangé.
 ```
 
 **Q4** — user1 vs user2 : voisins ?
 
 ```
-
-
+Non. user1 -> 453, user2 -> 742. Des chaînes proches ne donnent pas des indices voisins.
 ```
 
 **Q5** — `int` à la place de `unsigned long`
 
 ```
-
-
+david@mail.com et eve@mail.com changent : indices négatifs (-835 et -843).
+Utiliser cet indice pour accéder au tableau = accès hors limites / crash.
 ```
 
 **Q6** — Deux adresses, même indice ? Défaut ?
 
 ```
-
-
+Oui, deux adresses différentes peuvent donner le même indice (collision).
+Ce n'est pas un défaut : c'est normal, on gère avec le chaînage (exo 5).
 ```
 
 ---
@@ -163,22 +161,23 @@ Table de hachage avec chaînage : `hash_insert` / `hash_search` / `hash_free`.
 
 | Recherche | Attendu | Obtenu |
 | --- | --- | --- |
-| Adresse présente | true | |
-| Adresse absente | false | |
-| Annuaire vide | false | |
+| Adresse présente | true | true |
+| Adresse absente | false | false |
+| Annuaire vide | false | false |
 
 **Q3** — Insertion en tête inversée : observation
 
 ```
-
-
+Si on inverse les 2 lignes (table[i]=n puis n->next=table[i]),
+n->next pointe vers lui-même : la chaîne existante est perdue (+ fuite mémoire).
+Les recherches des éléments précédents échouent / comportement incorrect.
 ```
 
 **Q4** — Pourquoi sauver `n->next` avant `free(n)` ?
 
 ```
-
-
+Après free(n), lire n->next est interdit (mémoire déjà libérée).
+Il faut : suiv = n->next; free(n); n = suiv;
 ```
 
 ---
@@ -192,13 +191,30 @@ Banc de test commun : les deux approches doivent donner le même résultat.
 **Sortie de `./test`**
 
 ```
+[OK]    seq : annuaire vide
+[OK]    hash : annuaire vide
+[OK]    seq trouve alice@mail.com
+[OK]    hash trouve alice@mail.com
+[OK]    seq trouve bob@mail.com
+[OK]    hash trouve bob@mail.com
+[OK]    seq trouve carole@mail.com
+[OK]    hash trouve carole@mail.com
+[OK]    seq trouve david@mail.com
+[OK]    hash trouve david@mail.com
+[OK]    seq trouve eve@mail.com
+[OK]    hash trouve eve@mail.com
+[OK]    seq absente inconnu
+[OK]    hash absente inconnu
+[OK]    seq absente zoe
+[OK]    hash absente zoe
+[OK]    seq casse Alice
+[OK]    hash casse Alice
 
-
+Resultat : 18 / 18 tests OK
 ```
 
 **Code de retour**
 
 ```
-
-
+0
 ```

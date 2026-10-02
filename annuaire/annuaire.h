@@ -17,4 +17,12 @@ void seq_insert(const char *email, int id);
 bool seq_search(const char *email);
 void seq_free(void);
 
+/* fonction de hachage (djb2) */
+unsigned long hachage(const char *email);
+
+/* approche table de hachage avec chainage */
+void hash_insert(const char *email, int id);
+bool hash_search(const char *email);
+void hash_free(void);
+
 #endif
